@@ -11,3 +11,62 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+model Task {
+  id          Int         @id @unique @default(autoincrement())
+  title      String      
+  usersAssigned TaskUserAssignment[]
+  switchUserLimit  Boolean @default(false)
+  usersAssignedLimit   Int         @default(4)
+  remember    Boolean     @default(true)
+  dueDate     DateTime
+  creationDate DateTime @default(now())
+  groupId     Int
+  group       Group @relation(fields: [groupId], references: [id])
+  completed    Boolean    @default(false)
+}
+
+model User{
+  id          Int         @id @unique @default(autoincrement())
+  name        String      
+  lastName    String
+  profileImage String?
+  email        String     @unique
+  password    String
+
+  tasks        TaskUserAssignment[]
+
+  groups       GroupUser[]
+
+}
+
+model TaskUserAssignment{
+  userId          Int         
+  taskId          Int
+
+  user            User          @relation(fields: [userId], references: [id])
+  task            Task          @relation(fields: [taskId], references: [id])
+
+  //clave primaria compuesta
+  @@id([userId, taskId])
+}
+
+model GroupUser{
+  userId          Int
+  groupId         Int
+
+  user            User          @relation(fields: [userId], references: [id])
+  group           Group         @relation(fields: [groupId], references: [id])
+
+  @@id([userId, groupId])           
+}
+
+model Group{
+  id          Int         @unique @default(autoincrement())
+  name        String      
+  description String
+  backgroundImage String?
+
+  tasks       Task[]
+  users       GroupUser[]
+}
