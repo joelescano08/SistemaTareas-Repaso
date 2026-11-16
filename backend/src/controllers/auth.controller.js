@@ -40,35 +40,35 @@ export const Registrar = async (req, res) =>{
 export const login = async (req, res) =>{
     try{
         const {email, password} = req.body;
+
         if(!email || !password){
-                return res.status(400).json({error: "todos los campos son obligatorios"});
+            return res.status(400).json({error: "todos los campos son obligatorios"});
         }
-    
-        const FoundUser = await prisma.user.findUnique({
-            where:{
-                email: email
-            }
-        });
-    
-        if(!FoundUser){
-            return res.status(400).json({error: "usuario no encontrado"});
+
+        const usuario = await prisma.user.findUnique({
+            where:{email : email}
+        })
+
+        if(!usuario){
+            return res.status(400).json({error: "no existe un usuario con estas credenciales"});
         }
-    
-        const passwordValida = await bcrypt.compare(password, FoundUser.password);
-    
-        if(!passwordValida){
+
+
+        const validPassword = await bcrypt.compare(password, usuario.password);
+
+        if(!validPassword){
             return res.status(400).json({error: "contrasenia invalida"});
         }
-    
+
         const token = jwt.sign(
-            {id: FoundUser.id, rol: FoundUser.rol},
+            {id: usuario.id, rol: usuario.rol},
             process.env.JWT_SECRET,
-            {expiresIn: '2h'}
+            {expiresIn: "2h"}
         )
-    
-        res.json({token, user: {name: FoundUser.name}})
+
+        res.json({token, usuario: {name: usuario.name, rol: usuario.rol}})
         
     }catch(error){
-        return res.status(500).json({error: "Ha ocurrido un error al registrar"});
+        return res.status(500).json({error: "Ha ocurrido un error interno al iniciar sesion"});
     }
 }

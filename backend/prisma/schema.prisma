@@ -14,7 +14,7 @@ datasource db {
 
 model Task {
   id          Int         @id @unique @default(autoincrement())
-  title      String      
+  title      String       @default("tarea generica")
   usersAssigned TaskUserAssignment[]
   switchUserLimit  Boolean @default(false)
   usersAssignedLimit   Int         @default(4)
@@ -23,7 +23,8 @@ model Task {
   creationDate DateTime @default(now())
   groupId     Int
   group       Group @relation(fields: [groupId], references: [id])
-  completed    Boolean    @default(false)
+  completed   Boolean    @default(false)
+  priority    String     @default("medium") 
 }
 
 model User{
