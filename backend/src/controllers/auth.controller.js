@@ -45,28 +45,28 @@ export const login = async (req, res) =>{
             return res.status(400).json({error: "todos los campos son obligatorios"});
         }
 
-        const usuario = await prisma.user.findUnique({
+        const FoundUser = await prisma.user.findUnique({
             where:{email : email}
         })
 
-        if(!usuario){
+        if(!FoundUser){
             return res.status(400).json({error: "no existe un usuario con estas credenciales"});
         }
 
 
-        const validPassword = await bcrypt.compare(password, usuario.password);
+        const validPassword = await bcrypt.compare(password, FoundUser.password);
 
         if(!validPassword){
             return res.status(400).json({error: "contrasenia invalida"});
         }
 
         const token = jwt.sign(
-            {id: usuario.id, rol: usuario.rol},
+            {id: FoundUser.id, rol: FoundUser.rol},
             process.env.JWT_SECRET,
             {expiresIn: "2h"}
         )
 
-        res.json({token, usuario: {name: usuario.name, rol: usuario.rol}})
+        res.json({token, user: {name: FoundUser.name, rol: FoundUser.rol}})
         
     }catch(error){
         return res.status(500).json({error: "Ha ocurrido un error interno al iniciar sesion"});
